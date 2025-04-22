@@ -52,4 +52,21 @@ describe('ProductsController', () => {
             expect(next).toHaveBeenCalledWith(error);
         });
     });
+    describe('getById method', () => {
+        test('should call json when repo response is valid', async () => {
+            (mockRepo.readById as Mock).mockResolvedValueOnce({});
+            await productsController.getById(req, res, next);
+            expect(mockRepo.readById).toHaveBeenCalledWith('1');
+            expect(res.json).toHaveBeenCalledWith({
+                results: [{}],
+                error: '',
+            });
+        });
+
+        test('should call next when repo throws an error', async () => {
+            (mockRepo.readById as Mock).mockRejectedValueOnce(error);
+            await productsController.getById(req, res, next);
+            expect(next).toHaveBeenCalledWith(error);
+        });
+    });
 });
