@@ -69,4 +69,46 @@ describe('ProductsController', () => {
             expect(next).toHaveBeenCalledWith(error);
         });
     });
+    describe('create method', () => {
+        test('should call json when repo response is valid', async () => {
+            const newProduct = { id: 2, name: 'Producto 2' };
+            req.body = { name: 'Producto 2' };
+            (mockRepo.create as Mock).mockResolvedValueOnce(newProduct);
+
+            await productsController.create(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.json).toHaveBeenCalledWith({
+                results: [newProduct],
+                error: '',
+            });
+        });
+
+        test('should call next when repo throws an error', async () => {
+            (mockRepo.create as Mock).mockRejectedValueOnce(error);
+            await productsController.create(req, res, next);
+            expect(next).toHaveBeenCalledWith(error);
+        });
+    });
+
+    describe('update method', () => {
+        test('should call json when repo response is valid', async () => {
+            const updatedProduct = { id: 1, name: 'Producto Actualizado' };
+            req.body = { name: 'Producto Actualizado' };
+            (mockRepo.update as Mock).mockResolvedValueOnce(updatedProduct);
+
+            await productsController.update(req, res, next);
+
+            expect(res.json).toHaveBeenCalledWith({
+                results: [updatedProduct],
+                error: '',
+            });
+        });
+
+        test('should call next when repo throws an error', async () => {
+            (mockRepo.update as Mock).mockRejectedValueOnce(error);
+            await productsController.update(req, res, next);
+            expect(next).toHaveBeenCalledWith(error);
+        });
+    });
 });
