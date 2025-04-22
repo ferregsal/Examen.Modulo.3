@@ -4,11 +4,9 @@ import { screen } from '@testing-library/dom';
 
 describe('createHeader function', () => {
     test('Debe insertar el Header en el DOM', () => {
-        // Renderizar el componente en el body
         document.body.innerHTML = '<div id="root"></div>';
         const headerElement = createHeader('#root');
 
-        // Verificar que el header fue insertado
         expect(headerElement).toBeInstanceOf(HTMLElement);
         expect(screen.getByRole('banner')).not.toBeNull();
     });
