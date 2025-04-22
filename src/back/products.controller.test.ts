@@ -111,4 +111,24 @@ describe('ProductsController', () => {
             expect(next).toHaveBeenCalledWith(error);
         });
     });
+
+    describe('delete method', () => {
+        test('should call json when repo response is valid', async () => {
+            const deletedProduct = { id: 1, name: 'Producto Eliminado' };
+            (mockRepo.delete as Mock).mockResolvedValueOnce(deletedProduct);
+
+            await productsController.delete(req, res, next);
+
+            expect(res.json).toHaveBeenCalledWith({
+                results: [deletedProduct],
+                error: '',
+            });
+        });
+
+        test('should call next when repo throws an error', async () => {
+            (mockRepo.delete as Mock).mockRejectedValueOnce(error);
+            await productsController.delete(req, res, next);
+            expect(next).toHaveBeenCalledWith(error);
+        });
+    });
 });
