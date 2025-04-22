@@ -2,6 +2,7 @@ import { describe, test, expect, vi } from 'vitest';
 import { ApiRepo } from '../services/api.repo';
 import { Product } from '../types/product';
 import { Category } from '../types/category';
+
 const mockProducts: Product[] = [
     {
         id: 1,
@@ -23,7 +24,7 @@ const mockProducts: Product[] = [
 
 global.fetch = vi.fn();
 
-describe('ApiRepo - Test de métodos de API', () => {
+describe('ApiRepo - Test con manejo de errores', () => {
     const apiRepo = new ApiRepo();
 
     test('Debe obtener productos correctamente', async () => {
@@ -36,7 +37,7 @@ describe('ApiRepo - Test de métodos de API', () => {
         expect(products).toEqual(mockProducts);
     });
 
-    test('Debe manejar errores al obtener productos', async () => {
+    test('Debe lanzar error si la API falla en getProducts', async () => {
         vi.mocked(fetch).mockResolvedValue({
             ok: false,
             status: 500,
@@ -63,6 +64,18 @@ describe('ApiRepo - Test de métodos de API', () => {
         expect(createdProduct).toEqual({ id: 3, ...newProduct });
     });
 
+    test('Debe lanzar error si la API falla en createProduct', async () => {
+        vi.mocked(fetch).mockResolvedValue({
+            ok: false,
+            status: 400,
+            statusText: 'Bad Request',
+        } as Response);
+
+        await expect(apiRepo.createProduct({ name: 'Tablet' })).rejects.toThrow(
+            '400 Bad Request',
+        );
+    });
+
     test('Debe actualizar un producto correctamente', async () => {
         const updatedProduct = { price: 1000 };
 
@@ -75,6 +88,18 @@ describe('ApiRepo - Test de métodos de API', () => {
         expect(result.price).toBe(1000);
     });
 
+    test('Debe lanzar error si la API falla en updateProduct', async () => {
+        vi.mocked(fetch).mockResolvedValue({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+        } as Response);
+
+        await expect(
+            apiRepo.updateProduct(999, { price: 1000 }),
+        ).rejects.toThrow('404 Not Found');
+    });
+
     test('Debe eliminar un producto correctamente', async () => {
         vi.mocked(fetch).mockResolvedValue({
             ok: true,
@@ -84,5 +109,17 @@ describe('ApiRepo - Test de métodos de API', () => {
         const remainingProducts = await apiRepo.deleteProduct(1);
         expect(remainingProducts).toHaveLength(1);
         expect(remainingProducts[0].id).toBe(2);
+    });
+
+    test('Debe lanzar error si la API falla en deleteProduct', async () => {
+        vi.mocked(fetch).mockResolvedValue({
+            ok: false,
+            status: 500,
+            statusText: 'Internal Server Error',
+        } as Response);
+
+        await expect(apiRepo.deleteProduct(1)).rejects.toThrow(
+            '500 Internal Server Error',
+        );
     });
 });
